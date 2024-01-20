@@ -82,4 +82,25 @@ trait TimestampTrait
             ? Carbon::parse($this->updated_at)->diffInDays()
             : null;
     }
+
+    public function getDateFromTimestamp($timestamp)
+    {
+        return !empty($timestamp)
+            ? Carbon::parse($timestamp)->format(config('timeFormats.date'))
+            : null;
+    }
+
+    public function getTimeFromTimestamp($timestamp)
+    {
+        return !empty($timestamp)
+            ? Carbon::parse($timestamp)->format(config('timeFormats.time'))
+            : null;
+    }
+
+    public function getFullFromTimestamp($timestamp)
+    {
+        return !empty($timestamp)
+            ? Carbon::parse($timestamp)->format(config('timeFormats.date') . ' ' . config('timeFormats.time'))
+            : null;
+    }
 }
