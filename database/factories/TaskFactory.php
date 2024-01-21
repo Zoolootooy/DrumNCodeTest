@@ -26,7 +26,7 @@ class TaskFactory extends Factory
             'title' => fake()->text(250),
             'description' => fake()->text(500),
             'author_id' => User::query()->inRandomOrder()->first()->id,
-            'parent_id' => rand(0, 1) ? Task::where('status', 'todo')->inRandomOrder()->first()->id : null,
+            'parent_id' => rand(0, 1) ? Task::where('status', 'todo')->inRandomOrder()->first()?->id : null,
         ];
 
         if ($task['status'] === TaskStatus::Done) {

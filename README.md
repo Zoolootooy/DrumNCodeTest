@@ -1,3 +1,11 @@
+## Env
+Create .env and fill 
+- DB_USERNAME=admin
+- DB_PASSWORD=pass
+- DB_PORT=13307
+- DB_HOST (your docker ip) 
+- ELASTICSEARCH_HOSTS (your docker ip)
+
 ## Docker
 I used next ports for docker services:
 
@@ -18,9 +26,24 @@ After you've run docker containers, install composer packages:
 composer install
 ```
 
-And make migration with seeds:
+Generate app key:
 ```bash
-php artisan migrate --seed
+php artisan key:generate
+```
+
+And make migration:
+```bash
+php artisan migrate
+```
+
+Install passport:
+```bash
+php artisan passport:install
+```
+
+Make seeds if you need:
+```bash
+php artisan db:seed
 ```
 
 All users, that you will create in this way will have password = `12345678`
