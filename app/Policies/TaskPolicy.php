@@ -20,9 +20,13 @@ class TaskPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Task $task): bool
+    public function view(User $user, Task $task): Response
     {
-        //
+        if ($user->id !== $task->author_id) {
+            return Response::deny('You do not own this task');
+        }
+
+        return Response::allow();
     }
 
     /**

@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\DTO\Task\SearchTaskDTO;
 use App\DTO\Task\TaskDTO;
 use App\Http\Responses\ApiErrorResponse;
 use App\Models\Task;
+use App\Repositories\Search\ElasticsearchRepository;
+use App\Repositories\Search\SearchRepositoryInterface;
 use App\Repositories\Task\TaskRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
@@ -18,6 +21,25 @@ class TaskService
     public function __construct(TaskRepositoryInterface $repository)
     {
         $this->repository = $repository;
+    }
+
+    public function getFiltered(SearchTaskDTO $searchTaskDTO, SearchRepositoryInterface $searchRepository)
+    {
+        $tasks = $searchRepository->searchTasks($searchTaskDTO);
+
+        return $tasks;
+    }
+
+    public function getById(int $id)
+    {
+        try {
+            $task = $this->repository->getById($id);
+        } catch(\Exception $e) {
+            Log::error($e);
+            return new ApiErrorResponse('Can\'t find this task', 404);
+        }
+
+        return $task;
     }
 
     public function store(TaskDTO $taskDTO): Task|ApiErrorResponse

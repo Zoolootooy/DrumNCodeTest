@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 
-class TaskResource extends JsonResource
+class TaskWithChildrenResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -34,6 +34,8 @@ class TaskResource extends JsonResource
 
             'allChildrenCount' => $this->allChildren->count() ?? 0,
         ];
+
+        $response['allChildren'] = TaskWithChildrenResource::collection($this->whenLoaded('allChildren'));
 
         return $response;
     }

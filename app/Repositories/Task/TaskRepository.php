@@ -8,6 +8,14 @@ use Illuminate\Support\Arr;
 
 class TaskRepository implements TaskRepositoryInterface
 {
+    public function getById(int $id): Task
+    {
+        $task = Task::with(['allChildren'])
+            ->findOrFail($id);
+
+        return $task;
+    }
+
     public function store(TaskDTO $taskDTO): Task
     {
         $task = new Task();

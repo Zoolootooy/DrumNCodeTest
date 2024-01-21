@@ -2,10 +2,12 @@
 
 namespace App\Repositories\Search;
 
+use App\DTO\Task\SearchTaskDTO;
 use App\Models\Task;
 use Elasticsearch\Client;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class ElasticsearchRepository implements SearchRepositoryInterface
 {
@@ -22,6 +24,13 @@ class ElasticsearchRepository implements SearchRepositoryInterface
         $items = $this->searchOnElasticsearch($query);
 
         return $this->buildCollection($items);
+    }
+
+    public function searchTasks(SearchTaskDTO $searchTaskDTO): Collection
+    {
+        $items = $this->searchTaskOnElasticsearch($searchTaskDTO->getFields());
+
+        return $this->buildCollection($items, $searchTaskDTO->getFields()->sort);
     }
 
     private function searchOnElasticsearch(string $query = ''): array
@@ -44,14 +53,60 @@ class ElasticsearchRepository implements SearchRepositoryInterface
         return $items;
     }
 
-    private function buildCollection(array $items): Collection
+    private function searchTaskOnElasticsearch(object $searchTaskFields): array
+    {
+        $model = new Task;
+
+        $searchParams = [
+            'index' => $model->getSearchIndex(),
+            'type' => $model->getSearchType(),
+            'body' => [
+                'query' => [
+                    'bool' => [
+                        'filter' => [
+
+                        ]
+                    ],
+                ],
+            ],
+        ];
+        if ($searchTaskFields->query) {
+            $searchParams['body']['query']['bool']['must'][] = [
+                'multi_match' => [
+                    'fields' => ['title^3', 'description'],
+                    'query' => $searchTaskFields->query,
+                ]
+            ];
+        }
+        if ($searchTaskFields->status) {
+            $searchParams['body']['query']['bool']['filter'][] = [
+                'term' => [
+                    'status' => $searchTaskFields->status,
+                ]
+            ];
+        }
+        if ($searchTaskFields->priority) {
+            $searchParams['body']['query']['bool']['filter'][] = [
+                'term' => [
+                    'priority' => $searchTaskFields->priority,
+                ]
+            ];
+        }
+        $items = $this->elasticsearch->search($searchParams);
+
+        return $items;
+    }
+
+    private function buildCollection(array $items, object $sort): Collection
     {
         $ids = Arr::pluck($items['hits']['hits'], '_id');
 
-        return Task::with(['allChildren'])
-            ->findMany($ids)
-            ->sortBy(function ($article) use ($ids) {
-                return array_search($article->getKey(), $ids);
-            });
+        return Task::when((array)($sort), function ($q) use ($sort) {
+                foreach ($sort as $sortField => $sortOrder) {
+                    $q->orderBy($sortField, $sortOrder);
+                }
+            })
+            ->where('author_id', Auth::id())
+            ->findMany($ids);
     }
 }
