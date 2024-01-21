@@ -26,7 +26,7 @@ services:
         restart: unless-stopped
         tty: true
         ports:
-            - "20080:80"
+            - "10080:80"
             - "443:443"
         volumes:
             - ./:/var/www
