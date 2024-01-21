@@ -61,10 +61,15 @@ class ElasticsearchRepository implements SearchRepositoryInterface
             'index' => $model->getSearchIndex(),
             'type' => $model->getSearchType(),
             'body' => [
+                'size' => 10000,
                 'query' => [
                     'bool' => [
                         'filter' => [
-
+                            [
+                                'term' => [
+                                    'author_id' => Auth::id(),
+                                ]
+                            ]
                         ]
                     ],
                 ],
@@ -102,11 +107,10 @@ class ElasticsearchRepository implements SearchRepositoryInterface
         $ids = Arr::pluck($items['hits']['hits'], '_id');
 
         return Task::when((array)($sort), function ($q) use ($sort) {
-                foreach ($sort as $sortField => $sortOrder) {
-                    $q->orderBy($sortField, $sortOrder);
-                }
-            })
-            ->where('author_id', Auth::id())
+            foreach ($sort as $sortField => $sortOrder) {
+                $q->orderBy($sortField, $sortOrder);
+            }
+        })
             ->findMany($ids);
     }
 }
