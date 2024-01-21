@@ -19,38 +19,11 @@ class ElasticsearchRepository implements SearchRepositoryInterface
         $this->elasticsearch = $elasticsearch;
     }
 
-    public function search(string $query = ''): Collection
-    {
-        $items = $this->searchOnElasticsearch($query);
-
-        return $this->buildCollection($items);
-    }
-
     public function searchTasks(SearchTaskDTO $searchTaskDTO): Collection
     {
         $items = $this->searchTaskOnElasticsearch($searchTaskDTO->getFields());
 
         return $this->buildCollection($items, $searchTaskDTO->getFields()->sort);
-    }
-
-    private function searchOnElasticsearch(string $query = ''): array
-    {
-        $model = new Task;
-
-        $items = $this->elasticsearch->search([
-            'index' => $model->getSearchIndex(),
-            'type' => $model->getSearchType(),
-            'body' => [
-                'query' => [
-                    'multi_match' => [
-                        'fields' => ['title^3', 'description'],
-                        'query' => $query,
-                    ],
-                ],
-            ],
-        ]);
-
-        return $items;
     }
 
     private function searchTaskOnElasticsearch(object $searchTaskFields): array
