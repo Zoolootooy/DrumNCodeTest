@@ -22,7 +22,9 @@ class TaskObserver
      */
     public function creating(Task $task): void
     {
-        $task->author_id = Auth::id();
+        if (!$task->author_id) {
+            $task->author_id = Auth::id();
+        }
     }
 
     /**
