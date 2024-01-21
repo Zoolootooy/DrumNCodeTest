@@ -59,7 +59,7 @@ php artisan search:add-scheme
 ### Reindex Tasks table
 If you need reindex all tasks in DB, use:
 ```bash
-php artisansearch:reindex
+php artisan search:reindex
 ```
 
 ## Open Api documentation
